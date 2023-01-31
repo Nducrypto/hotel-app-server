@@ -26,18 +26,17 @@ export const createRoom = async (req, res, next) => {
 };
 export const getHotels = async (req, res, next) => {
   const { min, max, city, type, ...others } = req.query;
-  // console.log(req.query);
 
   try {
     const searchCity = new RegExp(city, "i");
+    const searchType = new RegExp(type, "i");
 
-    const hotels = type
-      ? await Hotel.find({ type })
-      : await Hotel.find({
-          ...others,
-          city: searchCity,
-          price: { $gte: min || 0, $lte: max || 1.797693134862316e308 },
-        });
+    const hotels = await Hotel.find({
+      ...others,
+      city: searchCity,
+      type: searchType,
+      price: { $gte: min || 0, $lte: max || 1.797693134862316e308 },
+    });
     res.status(200).json(hotels);
   } catch (err) {
     next(createError(401, "error making get request", "i hope it works"));
@@ -160,9 +159,6 @@ export const deleteHotel = async (req, res, next) => {
 };
 
 export const updateRoomAvailability = async (req, res, next) => {
-  console.log(req.params);
-
-  console.log(req.body.dates);
   try {
     await Hotel.updateOne(
       { "rooms._id": req.params.id },
